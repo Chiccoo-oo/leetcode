@@ -7,6 +7,10 @@ from sensor_msgs.msg import Range
 from std_msgs.msg import String
 from collections import deque
 
+# Directions for BFS movement
+# Up, Down, Left, Right (row, col)
+MOVES = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Corresponding to up, down, left, right
+
 class MazeSolverBFS(Node):
 
     def __init__(self):
@@ -26,12 +30,28 @@ class MazeSolverBFS(Node):
         self.right_distance = float('inf')
         self.rear_distance = float('inf')
 
+        # Maze grid representation (for simulation purposes, change this to your actual grid)
+        self.grid = [
+            [0, 0, 1, 0, 0],  # 0 = free, 1 = wall
+            [1, 0, 1, 1, 0],
+            [1, 0, 0, 1, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0]
+        ]
+        
+        self.rows = len(self.grid)
+        self.cols = len(self.grid[0])
+
         # Area tracking
         self.current_area = None
 
         # BFS tracking
-        self.visited = set()
-        self.queue = deque()  # Queue for BFS, stores positions (row, col) and path
+        self.visited = set()  # Visited positions in the grid
+        self.queue = deque()  # Queue for BFS, stores (row, col) and path
+
+        # Start position (could be modified based on actual start)
+        self.start = (0, 0)  # Starting at top-left corner
+        self.goal = (4, 4)   # Goal position (bottom-right corner)
 
         # Timer for control loop
         self.timer = self.create_timer(0.1, self.control_loop)
@@ -63,58 +83,48 @@ class MazeSolverBFS(Node):
             self.cmd_vel_pub.publish(twist_msg)
             return
 
-        # Stop the robot if back at Area 1
-        if self.current_area == "1" and self.front_distance < 0.5:
-            self.get_logger().info("Robot is back at the start position (Area 1), stopping.")
-            twist_msg.linear.x = 0.0
-            twist_msg.angular.z = 0.0
-            self.cmd_vel_pub.publish(twist_msg)
-            return
-
         # BFS movement logic
-        if self.front_distance > 0.5:
-            # Move forward if no obstacle
-            self.add_to_queue('forward')
-            twist_msg.linear.x = 0.5
-            twist_msg.angular.z = 0.0
-        elif self.left_distance > 0.5:
-            # Turn left if left path is unvisited
-            self.add_to_queue('left')
-            twist_msg.linear.x = 0.0
-            twist_msg.angular.z = 1.0
-        elif self.right_distance > 0.5:
-            # Turn right if right path is unvisited
-            self.add_to_queue('right')
-            twist_msg.linear.x = 0.0
-            twist_msg.angular.z = -1.0
+        # Get possible directions based on sensor readings (front, left, right, rear)
+        directions = self.get_possible_moves()
+
+        if directions:
+            # Move in the first available direction
+            direction = directions[0]
+            twist_msg.linear.x = 0.5 if direction in [(1, 0), (-1, 0)] else 0.0  # Move forward/backward
+            twist_msg.angular.z = 1.0 if direction == (0, -1) else -1.0 if direction == (0, 1) else 0.0
+            self.get_logger().info(f"Moving in direction: {direction}")
         else:
-            # Backtrack if no other unvisited paths
-            if self.queue:
-                self.backtrack()
-            else:
-                twist_msg.linear.x = 0.0
-                twist_msg.angular.z = 0.0
+            # If no possible moves, stop
+            twist_msg.linear.x = 0.0
+            twist_msg.angular.z = 0.0
+            self.get_logger().info("No moves available, stopping.")
 
         # Publish movement command
         self.cmd_vel_pub.publish(twist_msg)
 
-    def add_to_queue(self, direction):
+    def get_possible_moves(self):
         """
-        Adds the current position to the queue for BFS exploration.
+        Get all possible directions the robot can move based on the sensor readings
+        and the current position in the maze.
         """
-        current_position = (self.front_distance, self.left_distance, self.right_distance, self.rear_distance)
-        if current_position not in self.visited:
-            self.queue.append(current_position)
-            self.visited.add(current_position)
+        possible_moves = []
+        if self.front_distance > 0.5 and self.is_free(self.start[0] - 1, self.start[1]):  # Move Up
+            possible_moves.append((-1, 0))
+        if self.left_distance > 0.5 and self.is_free(self.start[0], self.start[1] - 1):  # Move Left
+            possible_moves.append((0, -1))
+        if self.right_distance > 0.5 and self.is_free(self.start[0], self.start[1] + 1):  # Move Right
+            possible_moves.append((0, 1))
+        if self.rear_distance > 0.5 and self.is_free(self.start[0] + 1, self.start[1]):  # Move Down
+            possible_moves.append((1, 0))
+        return possible_moves
 
-    def backtrack(self):
+    def is_free(self, row, col):
         """
-        Backtrack by popping from the queue.
+        Check if a grid cell is free to move (i.e., not a wall).
         """
-        if self.queue:
-            last_position = self.queue.pop()
-            self.get_logger().info(f"Backtracking to position: {last_position}")
-
+        if 0 <= row < self.rows and 0 <= col < self.cols:
+            return self.grid[row][col] == 0  # 0 means free, 1 means wall
+        return False
 
 def main(args=None):
     rclpy.init(args=args)
