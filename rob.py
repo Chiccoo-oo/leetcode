@@ -33,7 +33,7 @@ class MazeSolver(Node):
         self.current_area = None
 
         # Define the movement control loop timer
-        self.timer = self.create_timer(0.1, self.control_loop)
+        self.timer = self.create_timer(0.05, self.control_loop)  # Run at 20 Hz
 
     def front_sensor_callback(self, msg):
         self.front_distance = msg.range
@@ -71,28 +71,26 @@ class MazeSolver(Node):
             self.cmd_vel_pub.publish(twist_msg)
             return
 
-        # Optimized movement logic: Obstacle avoidance and wall-following
-        if self.front_distance < 0.5:
-            # If an obstacle is detected in front, decide based on side distances
+        # Optimized movement logic for faster navigation
+        if self.front_distance < 0.3:
+            # Obstacle ahead, turn sharply based on side distances
             if self.left_distance > self.right_distance:
-                # More space on the left, turn left
                 twist_msg.linear.x = 0.0
-                twist_msg.angular.z = 0.5
+                twist_msg.angular.z = 1.0  # Sharper left turn
             else:
-                # More space on the right, turn right
                 twist_msg.linear.x = 0.0
-                twist_msg.angular.z = -0.5
-        elif self.left_distance < 0.5:
-            # Maintain a distance from the left wall by slightly turning right
-            twist_msg.linear.x = 0.15
-            twist_msg.angular.z = -0.2
-        elif self.right_distance < 0.5:
-            # Maintain a distance from the right wall by slightly turning left
-            twist_msg.linear.x = 0.15
-            twist_msg.angular.z = 0.2
+                twist_msg.angular.z = -1.0  # Sharper right turn
+        elif self.left_distance < 0.3:
+            # Too close to the left wall, turn right slightly
+            twist_msg.linear.x = 0.3  # Faster forward motion
+            twist_msg.angular.z = -0.3
+        elif self.right_distance < 0.3:
+            # Too close to the right wall, turn left slightly
+            twist_msg.linear.x = 0.3  # Faster forward motion
+            twist_msg.angular.z = 0.3
         else:
-            # No immediate obstacles, move forward
-            twist_msg.linear.x = 0.25
+            # No obstacles nearby, move forward faster
+            twist_msg.linear.x = 0.5
             twist_msg.angular.z = 0.0
 
         # Publish the movement command
