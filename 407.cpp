@@ -50,7 +50,7 @@ public:
                 if (heightMap[x][y] < h)
                 {
                     ans += h - heightMap[x][y];
-                    minHeap.emplace(x, y, h); // Fill water in grid[x][y].
+                    minHeap.emplace(x, y, h); 
                 }
                 else
                 {
