@@ -17,7 +17,7 @@ int main()
             for (int j = 0; j < m; j++)
                 cin >> a[i][j];
 
-        // Find the maximum in each row and column
+        
         int ans = INT_MAX;
         vector<pair<int, int>> corners = {{0, 0}, {0, m - 1}, {n - 1, 0}, {n - 1, m - 1}};
         for (auto [r, c] : corners)
