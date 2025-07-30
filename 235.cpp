@@ -31,3 +31,59 @@ public:
         return nullptr;
     }
 };
+
+class MyQueue
+{
+private:
+    stack<int> ins;
+    stack<int> outs;
+    void transfer()
+    {
+        if (outs.empty())
+        {
+            while (!ins.empty())
+            {
+                outs.push(ins.top());
+                ins.pop();
+            }
+        }
+    }
+
+public:
+    MyQueue()
+    {
+    }
+
+    void push(int x)
+    {
+        ins.push(x);
+    }
+
+    int pop()
+    {
+        transfer();
+        int front = outs.top();
+        outs.pop();
+        return front;
+    }
+
+    int peek()
+    {
+        transfer();
+        return outs.top();
+    }
+
+    bool empty()
+    {
+        return ins.empty() && outs.empty();
+    }
+};
+
+/**
+ * Your MyQueue object will be instantiated and called as such:
+ * MyQueue* obj = new MyQueue();
+ * obj->push(x);
+ * int param_2 = obj->pop();
+ * int param_3 = obj->peek();
+ * bool param_4 = obj->empty();
+ */
