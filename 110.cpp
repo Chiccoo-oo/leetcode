@@ -31,3 +31,23 @@ public:
         return check(root) != -1;
     }
 };
+
+class Solution
+{
+public:
+    int dfs(TreeNode *root)
+    {
+        if (root == nullptr)
+            return 0;
+
+        int leftDepth = dfs(root->left);
+        int rightDepth = dfs(root->right);
+
+        return 1 + max(leftDepth, rightDepth);
+    }
+
+    int maxDepth(TreeNode *root)
+    {
+        return dfs(root);
+    }
+};
