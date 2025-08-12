@@ -6,6 +6,8 @@
         "ranges": "cpp",
         "span": "cpp",
         "stacktrace": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "chrono": "cpp",
+        "type_traits": "cpp"
     }
 }
