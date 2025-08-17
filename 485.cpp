@@ -3,19 +3,19 @@ class Solution
 public:
     int findMaxConsecutiveOnes(vector<int> &nums)
     {
-        int c = 0;    // current streak
-        int maxc = 0; // max streak so far
+        int c = 0;   
+        int maxc = 0; 
 
         for (int num : nums)
         {
             if (num == 1)
             {
                 c++;
-                maxc = max(c, maxc); // update existing maxc, not redeclare it
+                maxc = max(c, maxc); 
             }
             else
             {
-                c = 0; // reset streak
+                c = 0; 
             }
         }
 

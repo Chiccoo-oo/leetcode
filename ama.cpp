@@ -200,3 +200,68 @@ public:
         return sum_A + B;
     }
 };
+
+
+
+class Solution {
+public:
+    long long solve(vector<int>& A, int B) {
+        long long N = A.size();
+        long long sum_A = 0;
+        for (int x : A) {
+            sum_A += x;
+        }
+        long long min_cost = sum_A;
+
+        for (int k = 0; k < N; ++k) {
+            long long current_cost = sum_A + (long long)k * B;
+            
+            long long min_sum_k_items = -1;
+            long long current_sum = 0;
+
+            for (int i = 0; i < N; ++i) {
+                current_sum += A[i];
+                if (i >= k) {
+                    if (min_sum_k_items == -1 || current_sum < min_sum_k_items) {
+                        min_sum_k_items = current_sum;
+                    }
+                    current_sum -= A[i - k];
+                }
+            }
+            if (k > 0) {
+                 min_cost = min(min_cost, min_sum_k_items + (long long)(N - k) * B);
+            }
+        }
+        return min_cost;
+    }
+};
+
+
+
+
+
+
+class Solution {
+public:
+    long long solve(vector<int>& A, int B) {
+        long long N = A.size();
+        
+        long long total_sum = accumulate(A.begin(), A.end(), 0LL);
+        
+        long long min_cost = total_sum + (N - 1) * (long long)B;
+
+       vector<long long> prefix_sum(N + 1, 0);
+        for (int i = 0; i < N; ++i) {
+            prefix_sum[i + 1] = prefix_sum[i] + A[i];
+        }
+
+        long long min_prefix_val = 0;
+        for (int k = 1; k < N; ++k) {
+            min_prefix_val = min(min_prefix_val, prefix_sum[k] - (long long)k * B);
+            long long current_min_sum_cost = prefix_sum[k + 1] - (long long)k * B;
+            min_cost = min(min_cost, total_sum + (long long)(N - (k + 1)) * B + min_prefix_val + (prefix_sum[k + 1] - prefix_sum[k]));
+        }
+
+        return min_cost;
+    }
+};
