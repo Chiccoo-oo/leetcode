@@ -9,6 +9,7 @@
         "regex": "cpp",
         "chrono": "cpp",
         "type_traits": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "iostream": "cpp"
     }
 }
