@@ -1,21 +1,4 @@
-
-
-Array
-    Greedy
-        Hash Table 1733. Minimum Number of People to Teach 👎¶
-
-    Time : O(
-               m
-                   n)
-               O(mn)
-                   Space : O(
-                               m +
-                               n)
-                               O(m + n)
-
-                                   C++ Java
-                           Python
-                           class Solution
+class Solution
 {
 public:
     int minimumTeachings(int n, vector<vector<int>> &languages,
