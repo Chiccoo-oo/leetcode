@@ -10,7 +10,6 @@ public:
         vector<int> prevIndices(n);
         vector<long> values(nums.begin(), nums.end());
 
-        // Custom comparator for the set
         auto comp = [](const pair<long, int> &a, const pair<long, int> &b)
         {
             return a.first < b.first || (a.first == b.first && a.second < b.second);
